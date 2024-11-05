@@ -38,9 +38,10 @@ pipeline {
                         env.testing = "passed"
                     } else {
                         echo "test run failed: ${statusCode}"
+                        env.testing = "failed"
                     }
-                    echo env.testing
-                    echo env.switchEnvs
+                    echo test env.testing
+                    echo env switching is set to env.switchEnvs
                 }
             }
         }
@@ -50,7 +51,7 @@ pipeline {
             }
             steps {
                 sh "echo switching"
-                sh "helm upgrade blue-green-ingress --namespace ${env.namespace} --set target=demo-app-${env.targetEnv}"
+                sh "helm upgrade blue-green-ingress ./ingress-chart --namespace ${env.namespace} --set target=demo-app-${env.targetEnv}"
                 sh "echo switched app environments, now ${env.targetEnv} is active"
             }
         }
@@ -65,8 +66,8 @@ pipeline {
                     } else {
                         echo "test run failed: ${statusCode}"
                     }
-                    echo env.testing
-                    echo env.switchEnvs
+                    echo test env.testing
+                    echo env switching is set to env.switchEnvs
                 }
             }
         }
