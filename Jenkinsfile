@@ -32,7 +32,7 @@ pipeline {
         stage('test new version') {
             steps {
                 script {
-                    def statusCode = sh(script: "curl -o /dev/null -s -w "%{http_code}" http://demo-app-${env.targetEnv}.blue-green.svc.cluster.local:5000/version", returnStdout: true).trim()
+                    def statusCode = sh(script: "curl -o /dev/null -s -w '%{http_code}' http://demo-app-${env.targetEnv}.blue-green.svc.cluster.local:5000/version", returnStdout: true).trim()
                     echo "test response status code: ${statusCode}"
                     if (statusCode == '200') {
                         env.testing = "passed"
