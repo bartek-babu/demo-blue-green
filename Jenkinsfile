@@ -16,9 +16,9 @@ pipeline {
                         def value = props["${key}"]
                         env."${key}" = "${value}"
                     }
-                    if (props.targetEnv == "blue") {
+                    if (env.targetEnv == "blue") {
                         env.otherEnv = "green"
-                    } else if (props.targetEnv == "green") {
+                    } else if (env.targetEnv == "green") {
                         env.otherEnv = "blue"
                     }
                 }
