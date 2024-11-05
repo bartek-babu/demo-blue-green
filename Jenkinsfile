@@ -27,6 +27,7 @@ pipeline {
         stage('deploy new version') {
             steps {
                 sh "helm upgrade demo-app-${env.targetEnv} ./app-chart --namespace ${env.namespace} -f ./values-${env.targetEnv}.yaml"
+                sh "sleep 10"
             }
         }
         stage('test new version') {
