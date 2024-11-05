@@ -51,7 +51,7 @@ pipeline {
             }
             steps {
                 sh "echo switching"
-                sh "helm upgrade blue-green-ingress ./ingress-chart --namespace ${env.namespace} --set target=demo-app-${env.targetEnv}"
+                sh "helm upgrade blue-green-ingress ./ingress-chart --namespace ${env.namespace} --set ingress.target=demo-app-${env.targetEnv}"
                 sh "echo switched app environments, now ${env.targetEnv} is active"
             }
         }
@@ -77,7 +77,7 @@ pipeline {
             }
             steps {
                 sh "echo switching back due to failed test"
-                sh "helm upgrade blue-green-ingress --namespace ${env.namespace} --set target=demo-app-${env.otherEnv}"
+                sh "helm upgrade blue-green-ingress --namespace ${env.namespace} --set ingress.target=demo-app-${env.otherEnv}"
                 sh "echo switched back app environments, now ${env.otherEnv} is active"
             }
         }
