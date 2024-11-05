@@ -1,0 +1,8 @@
+
+name: blue-green-ingress
+namespace: blue-green
+ingress:
+  path: /version
+  pathType: Prefix
+  target: demo-app-green 
+  targetPort: 5000
