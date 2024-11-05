@@ -26,7 +26,7 @@ pipeline {
         }
         stage('deploy new version') {
             steps {
-                sh 'helm upgrade demo-app-${props.targetEnv} --namespace ${props.namespace} -f .values-${props.targetEnv}.yaml'
+                sh "helm upgrade demo-app-${props.targetEnv} --namespace ${props.namespace} -f .values-${props.targetEnv}.yaml"
             }
         }
         stage('test new version') {
