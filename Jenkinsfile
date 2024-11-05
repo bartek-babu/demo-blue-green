@@ -44,7 +44,7 @@ pipeline {
         }
         stage('Switch Router') {
             when {
-                expression { ${env.testing} == "passed" && ${env.switchEnvs} == "true" }
+                expression { env.testing == "passed" && env.switchEnvs == "true" }
             }
             steps {
                 sh "echo switching"
@@ -68,7 +68,7 @@ pipeline {
         }
         stage('rollback') {
             when {
-                expression { ${env.testing} != "passed" && ${env.switchEnvs} == "true" }
+                expression { env.testing != "passed" && env.switchEnvs == "true" }
             }
             steps {
                 sh "echo switching back due to failed test"
