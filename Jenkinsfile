@@ -40,8 +40,8 @@ pipeline {
                         echo "test run failed: ${statusCode}"
                         env.testing = "failed"
                     }
-                    echo test env.testing
-                    echo env switching is set to env.switchEnvs
+                    echo "test env.testing"
+                    echo "env switching is set to env.switchEnvs"
                 }
             }
         }
@@ -66,8 +66,8 @@ pipeline {
                     } else {
                         echo "test run failed: ${statusCode}"
                     }
-                    echo test env.testing
-                    echo env switching is set to env.switchEnvs
+                    echo "test env.testing"
+                    echo "env switching is set to env.switchEnvs"
                 }
             }
         }
