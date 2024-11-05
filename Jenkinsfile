@@ -10,7 +10,7 @@ pipeline {
         stage('Load Variables') {
             steps {
                 script {
-                    def props = readProperties  file: pipelineVars
+                    def props = readProperties  file: "./pipelineVars"
                     keys= props.keySet()
                     for(key in keys) {
                         value = props["${key}"]
