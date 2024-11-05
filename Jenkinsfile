@@ -12,21 +12,21 @@ pipeline {
                 script {
                     def props = readProperties  file: "./pipelineVars"
                     keys= props.keySet()
-                    for(key in keys) {
-                        value = props["${key}"]
+                    for (key in keys) {
+                        def value = props["${key}"]
                         env."${key}" = "${value}"
                     }
                     if (props.targetEnv == "blue") {
-                        props.otherEnv = "green"
+                        env.otherEnv = "green"
                     } else if (props.targetEnv == "green") {
-                        props.otherEnv = "blue"
+                        env.otherEnv = "blue"
                     }
                 }
             }
         }
         stage('deploy new version') {
             steps {
-                sh "helm upgrade demo-app-${props.targetEnv} --namespace ${props.namespace} -f .values-${props.targetEnv}.yaml"
+                sh "helm upgrade demo-app-${env.targetEnv} --namespace ${env.namespace} -f .values-${env.targetEnv}.yaml"
             }
         }
         stage('test new version') {
