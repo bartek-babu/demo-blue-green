@@ -1,74 +1,80 @@
 pipeline {
     agent any
 
-    environment {
-        blueTag = '0.0.1'
-        greenTag = "0.0.2"
-        switchEnvs = "true"
-        targetEnv = "blue"
-        testEndpoint = "http://34.140.118.237/version"
-    }
-
     stages {
         stage('clone repo') {
             steps {
                 git url: 'https://github.com/bartek-babu/demo-blue-green.git', branch: 'main' 
             }
         }
+        stage('Load Variables') {
+            steps {
+                script {
+                    def props = readProperties  file: pipelineVars
+                    keys= props.keySet()
+                    for(key in keys) {
+                        value = props["${key}"]
+                        env."${key}" = "${value}"
+                    }
+                    if (props.targetEnv == "blue") {
+                        props.otherEnv = "green"
+                    } else if (props.targetEnv == "green") {
+                        props.otherEnv = "blue"
+                    }
+                }
+            }
+        }
         stage('deploy new version') {
             steps {
-                sh 'helm upgrade demo-app-${targetEnv} --namespace blue-green -f ../app/demo-app/values-${targetEnv}.yaml'
+                sh 'helm upgrade demo-app-${props.targetEnv} --namespace ${props.namespace} -f .values-${props.targetEnv}.yaml'
             }
         }
         stage('test new version') {
             steps {
                 script {
-                    def statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" http://demo-app-$targetEnv.blue-green.svc.cluster.local:5000/version', returnStdout: true).trim()
+                    def statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" http://demo-app-${props.targetEnv}.blue-green.svc.cluster.local:5000/version', returnStdout: true).trim()
                     echo "test response status code: ${statusCode}"
                     if (statusCode == '200') {
-                        env.testing = "passed"
+                        props.testing = "passed"
                     } else {
-                        error "test run failed: ${statusCode}"
+                        echo "test run failed: ${statusCode}"
                     }
                 }
             }
         }
         stage('Switch Router') {
             when {
-                expression { env.testing == "passed" && env.switchEnvs == "true" }
+                expression { props.testing == "passed" && props.switchEnvs == "true" }
             }
             steps {
                 sh 'echo switching'
-                sh 'kubectl patch ingress blue-green-ingress -n blue-green --type=\'json\' -p=\'[{"op": "replace", "path": "/spec/rules/0/http/paths/0/backend/service/name", "value": "demo-app-\'$targetEnv\'"}]\''
-                sh 'echo "switched app environments, now ${targetEnv} is active"'
+                sh 'helm upgrade blue-green-ingress --namespace ${props.namespace} --set target=demo-app-${props.targetEnv}'
+                sh 'echo "switched app environments, now ${props.targetEnv} is active"'
             }
         }
         stage('live environment test') {
             steps {
                 script {
-                    def statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" ${testEndpoint}', returnStdout: true).trim()
+                    def statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" ${props.testEndpoint}', returnStdout: true).trim()
                     echo "live environment test response status code: ${statusCode}"
                     if (statusCode == '200') {
-                        env.testing = "passed"
+                        props.testing = "passed"
                         echo "live environment test passed"
                     } else {
-                        error "test run failed: ${statusCode}"
+                        echo "test run failed: ${statusCode}"
                     }
                 }
             }
         }
         stage('rollback') {
-            steps {
-                sh 'switch '
+            when {
+                expression { props.testing != "passed" && props.switchEnvs == "true" }
             }
-        }
-    }
-    post {
-        success {
-            echo 'app updated'
-        }
-        failure {
-            echo 'failed'
+            steps {
+                sh 'echo switching back due to failed test'
+                sh 'helm upgrade blue-green-ingress --namespace ${props.namespace} --set target=demo-app-${props.otherEnv}'
+                sh 'echo "switched back app environments, now ${props.otherEnv} is active"'
+            }
         }
     }
 }
