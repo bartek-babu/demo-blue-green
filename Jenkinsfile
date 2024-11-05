@@ -39,6 +39,8 @@ pipeline {
                     } else {
                         echo "test run failed: ${statusCode}"
                     }
+                    echo ${env.testing} 
+                    echo ${env.switchEnvs}
                 }
             }
         }
