@@ -2,3 +2,4 @@ targetEnv = "blue"
 switchEnvs = true
 testEndpoint = "http://34.140.118.237/version"
 namespace = "blue-green"
+scaleDown = true

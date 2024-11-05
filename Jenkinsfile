@@ -81,5 +81,15 @@ pipeline {
                 sh "echo switched back app environments, now ${env.otherEnv} is active"
             }
         }
+        stage('scaledown') {
+            when {
+                expression { env.testing == "passed" && env.switchEnvs == "true" && env.scaleDown == "true" }
+            }
+            steps {
+                sh "echo scaling down old version"
+                sh "helm upgrade demo-app-${env.otherEnv} ./app-chart --namespace ${env.namespace} -f ./values-${env.otherEnv}.yaml --set replicaCount=0"
+                sh "scaled down ${env.otherEnv} environment"
+            }
+        }
     }
 }
