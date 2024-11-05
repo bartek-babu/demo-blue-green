@@ -88,7 +88,7 @@ pipeline {
             steps {
                 sh "echo scaling down old version"
                 sh "helm upgrade demo-app-${env.otherEnv} ./app-chart --namespace ${env.namespace} -f ./values-${env.otherEnv}.yaml --set replicaCount=0"
-                sh "scaled down ${env.otherEnv} environment"
+                sh "echo scaled down ${env.otherEnv} environment"
             }
         }
     }
